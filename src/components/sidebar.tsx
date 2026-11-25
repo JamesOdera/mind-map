@@ -50,7 +50,7 @@ export default function Sidebar({
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-30 flex flex-col overflow-hidden bg-white transition-[width] duration-300 ${
+      className={`fixed inset-y-0 left-0 z-30 flex flex-col overflow-visible bg-white transition-[width] duration-300 ${
         collapsed ? "w-20" : "w-64"
       }`}
     >
@@ -79,23 +79,24 @@ export default function Sidebar({
         </button>
       </div>
 
+      {/* Workspace switcher */}
       <WorkspaceSwitcher collapsed={collapsed} />
 
       {/* Nav */}
-      <nav className="flex-1 space-y-6 overflow-y-auto overflow-x-hidden px-3 pb-6 pt-2">
-        {sections.map((section, i) => (
-          <div key={section.title ?? i}>
-            {section.title &&
-              (collapsed ? (
-                <div className="mx-3 mb-3 h-px bg-zinc-200" />
-              ) : (
-                <p className="mb-2 whitespace-nowrap px-3 text-[11px] font-medium uppercase tracking-wider text-zinc-400">
-                  {section.title}
-                </p>
-              ))}
+      <nav className="flex-1 space-y-6 overflow-y-auto overflow-x-hidden px-3 pb-6 pt-4">
+        {sections.map((section) => (
+          <div key={section.title}>
+            {collapsed ? (
+              <div className="mx-3 mb-3 h-px bg-zinc-200" />
+            ) : (
+              <p className="mb-2 whitespace-nowrap px-3 text-[11px] font-medium uppercase tracking-wider text-zinc-400">
+                {section.title}
+              </p>
+            )}
             <ul className="space-y-1">
               {section.items.map(({ label, href, icon: Icon }) => {
-                const active = pathname === href;
+                const active =
+                  href === "/" ? pathname === "/" : pathname.startsWith(href);
                 return (
                   <li key={href} className="relative">
                     {active && (

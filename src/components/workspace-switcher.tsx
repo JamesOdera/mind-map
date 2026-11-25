@@ -2,9 +2,23 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Layers } from "lucide-react";
 
-type Brand = { id: string; name: string; initials: string; color: string };
+type Brand = {
+  id: string;
+  name: string;
+  initials: string;
+  color: string;
+  isAll?: boolean;
+};
+
+const allWorkspaces: Brand = {
+  id: "all",
+  name: "All workspaces",
+  initials: "",
+  color: "bg-zinc-800",
+  isAll: true,
+};
 
 const brands: Brand[] = [
   { id: "ncba", name: "NCBA", initials: "N", color: "bg-brand" },
@@ -17,13 +31,49 @@ const brands: Brand[] = [
   },
 ];
 
+function Avatar({ brand, size }: { brand: Brand; size: "sm" | "md" }) {
+  const box = size === "md" ? "h-7 w-7 text-xs" : "h-6 w-6 text-[11px]";
+  return (
+    <span
+      className={`flex shrink-0 items-center justify-center rounded-md font-semibold text-white ${box} ${brand.color}`}
+    >
+      {brand.isAll ? <Layers size={size === "md" ? 14 : 13} /> : brand.initials}
+    </span>
+  );
+}
+
+function Option({
+  brand,
+  selected,
+  onSelect,
+}: {
+  brand: Brand;
+  selected: boolean;
+  onSelect: (b: Brand) => void;
+}) {
+  return (
+    <li>
+      <button
+        role="option"
+        aria-selected={selected}
+        onClick={() => onSelect(brand)}
+        className="flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left text-[15px] text-zinc-700 hover:bg-zinc-100"
+      >
+        <Avatar brand={brand} size="sm" />
+        <span className="flex-1 truncate">{brand.name}</span>
+        {selected && <Check size={16} className="text-brand" />}
+      </button>
+    </li>
+  );
+}
+
 export default function WorkspaceSwitcher({
   collapsed,
 }: {
   collapsed: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const [active, setActive] = useState<Brand>(brands[0]);
+  const [active, setActive] = useState<Brand>(allWorkspaces);
   const ref = useRef<HTMLDivElement>(null);
 
   // close on outside click or Escape
@@ -41,6 +91,11 @@ export default function WorkspaceSwitcher({
     };
   }, []);
 
+  const handleSelect = (b: Brand) => {
+    setActive(b);
+    setOpen(false);
+  };
+
   return (
     <div ref={ref} className="relative px-3 pb-2">
       <button
@@ -51,11 +106,7 @@ export default function WorkspaceSwitcher({
           collapsed ? "justify-center px-0" : ""
         }`}
       >
-        <span
-          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-xs font-semibold text-white ${active.color}`}
-        >
-          {active.initials}
-        </span>
+        <Avatar brand={active} size="md" />
         {!collapsed && (
           <>
             <span className="flex-1 truncate text-[15px] font-medium text-zinc-700">
@@ -78,31 +129,24 @@ export default function WorkspaceSwitcher({
               collapsed ? "left-full ml-2 w-56" : "inset-x-3"
             }`}
           >
-            <li className="px-2.5 pb-1 pt-1.5 text-[11px] font-medium uppercase tracking-wider text-zinc-400">
+            <Option
+              brand={allWorkspaces}
+              selected={active.id === allWorkspaces.id}
+              onSelect={handleSelect}
+            />
+
+            <li role="separator" className="my-1.5 h-px bg-zinc-200" />
+
+            <li className="px-2.5 pb-1 pt-1 text-[11px] font-medium uppercase tracking-wider text-zinc-400">
               Brands
             </li>
             {brands.map((b) => (
-              <li key={b.id}>
-                <button
-                  role="option"
-                  aria-selected={b.id === active.id}
-                  onClick={() => {
-                    setActive(b);
-                    setOpen(false);
-                  }}
-                  className="flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left text-[15px] text-zinc-700 hover:bg-zinc-100"
-                >
-                  <span
-                    className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[11px] font-semibold text-white ${b.color}`}
-                  >
-                    {b.initials}
-                  </span>
-                  <span className="flex-1 truncate">{b.name}</span>
-                  {b.id === active.id && (
-                    <Check size={16} className="text-brand" />
-                  )}
-                </button>
-              </li>
+              <Option
+                key={b.id}
+                brand={b}
+                selected={active.id === b.id}
+                onSelect={handleSelect}
+              />
             ))}
           </motion.ul>
         )}
