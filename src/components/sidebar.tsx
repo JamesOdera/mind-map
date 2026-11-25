@@ -12,6 +12,7 @@ import {
   ChevronsLeft,
   type LucideIcon,
 } from "lucide-react";
+import WorkspaceSwitcher from "./workspace-switcher";
 
 type Item = { label: string; href: string; icon: LucideIcon };
 type Section = { title: string; items: Item[] };
@@ -77,6 +78,8 @@ export default function Sidebar({
           />
         </button>
       </div>
+
+      <WorkspaceSwitcher collapsed={collapsed} />
 
       {/* Nav */}
       <nav className="flex-1 space-y-6 overflow-y-auto overflow-x-hidden px-3 pb-6 pt-2">
